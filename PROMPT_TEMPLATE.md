@@ -21,14 +21,9 @@ GSAP + ScrollTrigger for cinematic scroll reveals & parallax. Lenis for smooth s
 - Positioned absolute inset-0 w-full h-full object-cover z-0
 
 === FONTS ===
-- Import from Google Fonts: Playfair Display (display serif, load italic too) and Inter weights 400/500 (body)
-- CSS variables: --font-display: 'Playfair Display', serif  and  --font-body: 'Inter', sans-serif
-- Body uses var(--font-body); headings use inline fontFamily: "'Playfair Display', serif"
-- ⚠️ VIETNAMESE: the content is in Vietnamese, so EVERY font must include the `vietnamese`
-  Google Fonts subset. Do NOT use Instrument Serif, Almarai, Cormorant, EB Garamond — they
-  lack Vietnamese glyphs, so accented chars (ế, ữ, ậ, ầ, ă…) fall back mid-word and look broken.
-  Safe picks: Inter, Be Vietnam Pro, Plus Jakarta Sans (sans) · Playfair Display, Lora,
-  Noto Serif (serif). Verify the font's Google Fonts page lists "Vietnamese" before using it.
+- Import from Google Fonts: Instrument Serif (display) and Inter weights 400/500 (body)
+- CSS variables: --font-display: 'Instrument Serif', serif  and  --font-body: 'Inter', sans-serif
+- Body uses var(--font-body); headings use inline fontFamily: "'Instrument Serif', serif"
 
 === COLOR THEME (dark, HSL values for CSS variables) ===
 --background: 201 100% 13%        (deep navy blue)
@@ -40,7 +35,7 @@ GSAP + ScrollTrigger for cinematic scroll reveals & parallax. Lenis for smooth s
 
 === NAVIGATION BAR ===
 - fixed top, z-50, flex row, justify-between, px-8 py-6, max-w-7xl mx-auto
-- Logo: "[BRAND]®" (® as <sup className="text-xs">), text-3xl tracking-tight, Playfair Display, text-foreground
+- Logo: "[BRAND]®" (® as <sup className="text-xs">), text-3xl tracking-tight, Instrument Serif, text-foreground
 - Nav links (hidden on mobile, md:flex): [LINK_1] (active, text-foreground), [LINK_2], [LINK_3], [LINK_4]
   — all text-sm text-muted-foreground with hover:text-foreground transition-colors
   — each link smooth-scrolls (Lenis) to its matching section id
@@ -49,7 +44,7 @@ GSAP + ScrollTrigger for cinematic scroll reveals & parallax. Lenis for smooth s
 === HERO SECTION ===
 - min-h-screen, flex column, centered, text-center, px-6, generous vertical padding
 - H1: "[HERO_HEADLINE]" — text-5xl sm:text-7xl md:text-8xl, leading-[0.95], tracking-[-2.46px],
-  max-w-7xl, font-normal, Playfair Display. Wrap [KEY_WORDS] in
+  max-w-7xl, font-normal, Instrument Serif. Wrap [KEY_WORDS] in
   <em className="not-italic text-muted-foreground"> for color contrast.
 - Subtext: text-muted-foreground text-base sm:text-lg max-w-2xl mt-8 leading-relaxed — "[SUBTEXT]"
 - CTA button: "[HERO_CTA]", liquid-glass rounded-full px-14 py-5 text-base text-foreground mt-12,
