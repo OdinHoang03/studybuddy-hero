@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyBuddy — Đừng ôn thi một mình nữa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#4F46E5; --brand-d:#3730A3; --ink:#0F1020; --body:#4A4A63;
+    --bg:#FFFFFF; --soft:#F5F4FF; --line:#E9E8F5; --accent:#FFB020;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--body); background:var(--bg); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px;}
+  h1,h2,h3{color:var(--ink); line-height:1.15; letter-spacing:-0.02em;}
+  .btn{display:inline-flex; align-items:center; gap:8px; background:var(--brand); color:#fff; text-decoration:none;
+       padding:15px 30px; border-radius:12px; font-weight:700; font-size:16px; box-shadow:0 8px 22px rgba(79,70,229,.28); transition:transform .15s;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn.lg{padding:17px 38px; font-size:17px;}
+
+  /* nav */
+  nav{position:sticky; top:0; z-index:50; background:rgba(255,255,255,.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  nav .row{display:flex; align-items:center; justify-content:space-between; height:68px;}
+  .logo{display:flex; align-items:center; gap:9px; font-weight:800; font-size:19px; color:var(--ink);}
+  .logo .dot{width:26px; height:26px; border-radius:8px; background:var(--brand); display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px;}
+  nav .cta{background:var(--brand); color:#fff; text-decoration:none; padding:10px 20px; border-radius:10px; font-weight:700; font-size:14px;}
+
+  /* hero */
+  .hero{padding:84px 0 76px; display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:center;}
+  .tag{display:inline-block; background:var(--soft); color:var(--brand-d); font-weight:700; font-size:13px; padding:7px 15px; border-radius:999px; margin-bottom:22px;}
+  .hero h1{font-size:54px; font-weight:800; margin-bottom:20px;}
+  .hero h1 span{color:var(--brand);}
+  .hero p{font-size:19px; max-width:480px; margin-bottom:30px;}
+  .herocta{display:flex; align-items:center; gap:20px; flex-wrap:wrap;}
+  .proof{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--body);}
+  .avs{display:flex;}
+  .avs span{width:30px; height:30px; border-radius:50%; border:2px solid #fff; margin-left:-8px; background:linear-gradient(135deg,#A5B4FC,#4F46E5);}
+  /* hero visual: phone mock */
+  .phone{justify-self:center; width:280px; height:420px; background:var(--ink); border-radius:32px; padding:12px; box-shadow:0 30px 60px rgba(15,16,32,.25); position:relative;}
+  .screen{background:#fff; border-radius:22px; height:100%; overflow:hidden; display:flex; flex-direction:column;}
+  .screen .top{background:var(--brand); color:#fff; padding:20px 18px 24px;}
+  .screen .top b{font-size:15px;} .screen .top .s{font-size:12px; opacity:.85;}
+  .match{margin:14px; border:1px solid var(--line); border-radius:14px; padding:13px; display:flex; gap:11px; align-items:center;}
+  .match .a{width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#FCD34D,#F59E0B); flex:none;}
+  .match .a.b{background:linear-gradient(135deg,#A5B4FC,#4F46E5);}
+  .match .nm{font-size:13px; font-weight:700; color:var(--ink);} .match .mt{font-size:11px; color:var(--body);}
+  .match .ok{margin-left:auto; background:var(--soft); color:var(--brand-d); font-size:11px; font-weight:700; padding:5px 9px; border-radius:8px;}
+
+  section.s{padding:80px 0;}
+  .eyebrow{text-align:center; color:var(--brand); font-weight:700; font-size:13px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px;}
+  .h2c{text-align:center; font-size:38px; font-weight:800; margin-bottom:14px;}
+  .lead{text-align:center; font-size:18px; max-width:560px; margin:0 auto 50px;}
+
+  /* problem */
+  .problem{background:var(--soft);}
+  .pgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  .pcard{background:#fff; border:1px solid var(--line); border-radius:18px; padding:30px 26px;}
+  .pcard .ic{font-size:28px; margin-bottom:16px;}
+  .pcard p{font-size:16px; color:var(--ink); font-weight:600; line-height:1.5;}
+
+  /* solution */
+  .sgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  .scard{padding:8px 4px;}
+  .scard .ck{width:42px; height:42px; border-radius:12px; background:var(--soft); color:var(--brand); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;}
+  .scard h3{font-size:18px; margin-bottom:8px;} .scard p{font-size:15px;}
+
+  /* how */
+  .how{background:var(--ink);}
+  .how .eyebrow{color:#A5B4FC;} .how .h2c{color:#fff;} .how .lead{color:#B6B8CC;}
+  .hsteps{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; counter-reset:st;}
+  .hstep{background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:30px 26px;}
+  .hstep .n{width:44px; height:44px; border-radius:12px; background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px; margin-bottom:18px;}
+  .hstep h3{color:#fff; font-size:18px; margin-bottom:8px;} .hstep p{color:#B6B8CC; font-size:15px;}
+
+  /* proof */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:30px; text-align:center; margin-bottom:50px;}
+  .stat .big{font-size:46px; font-weight:800; color:var(--brand); letter-spacing:-0.03em;}
+  .stat .lb{font-size:15px; color:var(--body);}
+  .quote{max-width:680px; margin:0 auto; text-align:center; font-size:22px; font-weight:600; color:var(--ink); line-height:1.5;}
+  .qby{text-align:center; margin-top:18px; font-size:14px; color:var(--body);}
+
+  /* final cta */
+  .final{background:linear-gradient(135deg,var(--brand),var(--brand-d)); border-radius:28px; padding:64px 40px; text-align:center; margin:0 0 80px;}
+  .final h2{color:#fff; font-size:40px; font-weight:800; margin-bottom:16px;}
+  .final p{color:#DAD8FF; font-size:18px; margin-bottom:30px;}
+  .final .btn{background:#fff; color:var(--brand-d); box-shadow:0 10px 30px rgba(0,0,0,.2);}
+
+  footer{border-top:1px solid var(--line); padding:36px 0; display:flex; justify-content:space-between; align-items:center; font-size:14px; color:var(--body);}
+
+  @media(max-width:820px){
+    .hero{grid-template-columns:1fr; text-align:center;} .hero p{margin-left:auto; margin-right:auto;}
+    .herocta{justify-content:center;} .phone{margin-top:30px;}
+    .hero h1{font-size:40px;} .pgrid,.sgrid,.hsteps,.stats{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+  <nav><div class="wrap row">
+    <div class="logo"><span class="dot">S</span>StudyBuddy</div>
+    <a href="#cta" class="cta">Tìm bạn học ngay</a>
+  </div></nav>
+
+  <!-- HERO -->
+  <header class="wrap hero">
+    <div>
+      <span class="tag">⚡ Dành cho học sinh THPT đang ôn thi</span>
+      <h1>Đừng ôn thi <span>một mình</span> nữa.</h1>
+      <p>StudyBuddy ghép bạn với 3–5 bạn học cùng môn trong 60 giây — để cùng học, cùng hỏi bài và không ai bỏ cuộc giữa chừng.</p>
+      <div class="herocta">
+        <a href="#cta" class="btn lg">Tìm bạn học ngay →</a>
+        <div class="proof">
+          <div class="avs"><span></span><span></span><span></span><span></span></div>
+          2.400+ học sinh đang học cùng nhau
+        </div>
+      </div>
+    </div>
+    <div class="phone"><div class="screen">
+      <div class="top"><b>Nhóm Toán 12</b><div class="s">Ôn thi THPT · 4 thành viên</div></div>
+      <div class="match"><div class="a"></div><div><div class="nm">Minh Anh</div><div class="mt">Đang ôn: Hàm số</div></div><span class="ok">Online</span></div>
+      <div class="match"><div class="a b"></div><div><div class="nm">Quốc Bảo</div><div class="mt">Đang ôn: Tích phân</div></div><span class="ok">Online</span></div>
+      <div class="match"><div class="a"></div><div><div class="nm">Thu Hà</div><div class="mt">Đang ôn: Hàm số</div></div><span class="ok">Học chung</span></div>
+    </div></div>
+  </header>
+
+  <!-- PROBLEM -->
+  <section class="s problem"><div class="wrap">
+    <div class="eyebrow">Bạn có thấy quen?</div>
+    <h2 class="h2c">Ôn thi một mình rất dễ nản</h2>
+    <p class="lead">Càng gần ngày thi, học một mình càng đuối — và bạn không phải người duy nhất.</p>
+    <div class="pgrid">
+      <div class="pcard"><div class="ic">😶‍🌫️</div><p>Kẹt một bài Toán cả buổi tối, không biết hỏi ai.</p></div>
+      <div class="pcard"><div class="ic">😮‍💨</div><p>Mở sách ra là buồn ngủ, học được 20 phút lại cầm điện thoại.</p></div>
+      <div class="pcard"><div class="ic">📉</div><p>Lên kế hoạch ôn thi rất hăng — 3 ngày sau là bỏ.</p></div>
+    </div>
+  </div></section>
+
+  <!-- SOLUTION -->
+  <section class="s"><div class="wrap">
+    <div class="eyebrow">Giải pháp</div>
+    <h2 class="h2c">Có bạn học cùng, mọi thứ khác hẳn</h2>
+    <p class="lead">StudyBuddy không phải thêm một app ghi chú. Đây là nơi bạn tìm thấy người học cùng nhịp với mình.</p>
+    <div class="sgrid">
+      <div class="scard"><div class="ck">✓</div><h3>Luôn có người hỏi bài</h3><p>Kẹt chỗ nào, nhắn nhóm — có bạn cùng môn giải đáp ngay.</p></div>
+      <div class="scard"><div class="ck">✓</div><h3>Học đều vì có người chờ</h3><p>Lịch học chung khiến bạn khó bỏ buổi hơn hẳn khi học một mình.</p></div>
+      <div class="scard"><div class="ck">✓</div><h3>Đúng người, đúng môn</h3><p>Được ghép với bạn cùng khối, cùng mục tiêu — không lạc lõng.</p></div>
+    </div>
+  </div></section>
+
+  <!-- HOW IT WORKS -->
+  <section class="s how"><div class="wrap">
+    <div class="eyebrow">Cách hoạt động</div>
+    <h2 class="h2c">Bắt đầu trong 60 giây</h2>
+    <p class="lead">Không cần cài đặt phức tạp. Ba bước là có nhóm học.</p>
+    <div class="hsteps">
+      <div class="hstep"><div class="n">1</div><h3>Chọn môn & mục tiêu</h3><p>Cho biết bạn đang ôn môn gì và muốn đạt mức nào.</p></div>
+      <div class="hstep"><div class="n">2</div><h3>Được ghép nhóm</h3><p>Nhận ngay 3–5 bạn học cùng môn, cùng trình độ.</p></div>
+      <div class="hstep"><div class="n">3</div><h3>Học chung theo lịch</h3><p>Vào phòng học online, hỏi bài và nhắc nhau mỗi ngày.</p></div>
+    </div>
+  </div></section>
+
+  <!-- SOCIAL PROOF -->
+  <section class="s"><div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="big">2.400+</div><div class="lb">học sinh đang học cùng nhau</div></div>
+      <div class="stat"><div class="big">87%</div><div class="lb">học đều hơn sau 2 tuần</div></div>
+      <div class="stat"><div class="big">4.8★</div><div class="lb">đánh giá trên CH Play</div></div>
+    </div>
+    <p class="quote">"Trước mình toàn học nửa chừng rồi bỏ. Có nhóm rồi tự nhiên tối nào cũng mở máy vì sợ các bạn chờ."</p>
+    <p class="qby">— Lan Phương, lớp 12, Hà Nội</p>
+  </div></section>
+
+  <!-- FINAL CTA -->
+  <section class="wrap"><div class="final" id="cta">
+    <h2>Tìm bạn học của bạn ngay hôm nay</h2>
+    <p>Miễn phí · Không cần thẻ · Có nhóm trong 60 giây.</p>
+    <a href="#" class="btn lg">Tìm bạn học ngay →</a>
+  </div></section>
+
+  <div class="wrap"><footer>
+    <div class="logo" style="font-size:16px;"><span class="dot" style="width:22px;height:22px;font-size:13px;">S</span>StudyBuddy</div>
+    <div>© 2026 StudyBuddy · Điều khoản · Liên hệ</div>
+  </footer></div>
+</body>
+</html>

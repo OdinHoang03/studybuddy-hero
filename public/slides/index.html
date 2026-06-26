@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop 3 — Xây dựng Website cho Sản phẩm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ONE accent. neutrals only otherwise. */
+    --ink:#0E1A24;          /* dark bg + strongest text */
+    --ink-2:#1B2A36;        /* dark card surface */
+    --text:#16242F;         /* body text on light */
+    --paper:#F6F8FA;        /* light bg */
+    --surface:#FFFFFF;      /* light card */
+    --accent:#0ABFA3;       /* the single accent */
+    --accent-deep:#067D6B;  /* accent text on light */
+    --accent-tint:rgba(10,191,163,.09);
+    --line:#E4E9EF;         /* hairlines / borders */
+    --line-dark:rgba(255,255,255,.12);
+    --muted:#7C8A99;        /* secondary text (light) */
+    --muted-d:#8FA1AF;      /* secondary text (dark) */
+    --r:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:#05080c; font-family:'Inter',system-ui,sans-serif;
+    overflow:hidden; display:flex; align-items:center; justify-content:center;
+    color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+  #stage{width:1280px; height:720px; position:relative; transform-origin:center; flex:none;}
+
+  .slide{position:absolute; inset:0; padding:78px 104px; display:none; flex-direction:column; overflow:hidden; isolation:isolate;}
+  .slide.active{display:flex;}
+  .slide.light{background:var(--paper); color:var(--text);}
+  .slide.dark{background:var(--ink); color:#fff;}
+
+  /* ---- animated backgrounds (dark slides only) ---- */
+  .slide.dark::after{
+    content:""; position:absolute; inset:-40%; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(closest-side, rgba(10,191,163,.16), transparent 70%) 22% 28% / 55% 55% no-repeat,
+      radial-gradient(closest-side, rgba(10,191,163,.09), transparent 70%) 80% 78% / 52% 52% no-repeat;
+    animation: aurora 24s ease-in-out infinite alternate;
+  }
+  @keyframes aurora{ 0%{transform:rotate(0deg) scale(1);} 100%{transform:rotate(10deg) scale(1.14);} }
+  .cover::before{
+    content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    background-image: radial-gradient(rgba(255,255,255,.06) 1.2px, transparent 1.4px);
+    background-size: 30px 30px;
+    -webkit-mask-image: radial-gradient(ellipse 72% 70% at 50% 45%, #000 35%, transparent 78%);
+            mask-image: radial-gradient(ellipse 72% 70% at 50% 45%, #000 35%, transparent 78%);
+    animation: gridpan 32s linear infinite;
+  }
+  @keyframes gridpan{ from{background-position:0 0;} to{background-position:30px 30px;} }
+  @media (prefers-reduced-motion: reduce){ .slide.dark::after, .cover::before{animation:none;} }
+
+  /* ---- shared type system ---- */
+  .disp{font-family:'Bricolage Grotesque'; font-weight:700; letter-spacing:-0.02em; line-height:1.06;}
+  .mono{font-family:'JetBrains Mono'; font-weight:600; letter-spacing:.14em; text-transform:uppercase;}
+  .kicker{font-family:'JetBrains Mono'; font-weight:600; letter-spacing:.16em; text-transform:uppercase; font-size:12px; color:var(--accent-deep);}
+  .slide.dark .kicker{color:var(--accent);}
+  h2.title{font-family:'Bricolage Grotesque'; font-weight:600; font-size:30px; letter-spacing:-0.01em;}
+  .slide.dark h2.title{color:#fff;}
+  .lead{font-size:16px; line-height:1.5;}
+  .muted{color:var(--muted);} .slide.dark .muted{color:var(--muted-d);}
+  .it{font-style:italic;}
+
+  /* signature: one thin accent rule, identical everywhere */
+  .rule{width:64px; height:3px; background:var(--accent); border-radius:2px; margin-bottom:22px; flex:none;}
+
+  .header{margin-bottom:30px; flex:none;}
+  .header .kicker{margin-bottom:12px;}
+
+  /* pills — outline only, single accent */
+  .pill{display:inline-flex; align-items:center; gap:7px; padding:8px 16px; border-radius:999px;
+        font-size:13px; font-weight:600; border:1px solid var(--accent); color:var(--accent-deep); background:transparent; white-space:nowrap;}
+  .slide.dark .pill{color:var(--accent);}
+  .pill.solid{background:var(--accent); color:#04201b; border-color:var(--accent);}
+  .pill.ghost{border-color:var(--line); color:var(--muted);}
+
+  /* cards — neutral surface, hairline */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);}
+  .slide.dark .card{background:var(--ink-2); border-color:var(--line-dark);}
+
+  /* ---- COVER ---- */
+  .cover{justify-content:center;}
+  .cover .brand{position:absolute; top:60px; left:104px;}
+  .cover .speaker{display:flex; align-items:center; gap:14px; margin-top:38px;}
+  .cover .slabel{font-family:'JetBrains Mono'; font-weight:600; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); border:1px solid var(--accent); padding:6px 13px; border-radius:999px;}
+  .cover .sname{font-family:'Bricolage Grotesque'; font-weight:600; font-size:23px; color:#fff;}
+
+  /* ---- DIVIDER (one unified style) ---- */
+  .divider{justify-content:center; padding-left:128px;}
+  .divider::before{content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--accent);}
+  .divider .num{position:absolute; top:78px; right:104px; font-family:'Bricolage Grotesque'; font-weight:700;
+                font-size:120px; line-height:1; color:rgba(255,255,255,.05);}
+
+  /* ---- AGENDA timeline ---- */
+  .tl{position:relative; display:flex; flex-direction:column; flex:1; padding-left:52px;}
+  .tl::before{content:""; position:absolute; left:30px; top:14px; bottom:14px; width:2px; background:linear-gradient(var(--accent), rgba(10,191,163,.18));}
+  .tli{position:relative; display:flex; flex-direction:column; justify-content:center; border-top:1px solid var(--line);}
+  .tli:first-child{border-top:0;}
+  .tlnode{position:absolute; left:-29px; top:50%; transform:translateY(-50%); width:14px; height:14px; border-radius:50%; background:#fff; border:2.5px solid var(--accent);}
+  .tltag{font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);}
+  .tlttl{font-family:'Bricolage Grotesque'; font-weight:600; font-size:19px; color:var(--ink); margin:2px 0;}
+  .tldesc{font-size:12.5px; color:var(--muted);}
+
+  /* ---- generic columns ---- */
+  .cols{display:grid; gap:18px; flex:1;}
+  .c2{grid-template-columns:1fr 1fr;} .c3{grid-template-columns:repeat(3,1fr);} .c5{grid-template-columns:repeat(5,1fr);}
+  .colcard{padding:22px; display:flex; flex-direction:column;}
+  .colcard .ch{font-family:'Bricolage Grotesque'; font-weight:600; font-size:16px; margin-bottom:14px; display:flex; align-items:center; gap:9px;}
+  .colcard .ch .n{font-family:'JetBrains Mono'; color:var(--accent-deep); font-size:14px;}
+  .slide.dark .colcard .ch .n{color:var(--accent);}
+  .li{font-size:14px; line-height:1.4; display:flex; gap:9px; margin-bottom:11px; color:var(--text);}
+  .slide.dark .li{color:#D4DCE3;}
+  .li::before{content:""; width:5px; height:5px; border-radius:999px; background:var(--accent); margin-top:8px; flex:none;}
+
+  /* ---- mini website wireframes (slide 5) ---- */
+  .mock{border:1px solid var(--line); border-radius:9px; overflow:hidden; background:#fff; margin-bottom:16px; flex:none;}
+  .mock .bar{height:22px; background:#EEF2F6; display:flex; align-items:center; gap:5px; padding:0 10px; border-bottom:1px solid var(--line);}
+  .mock .bar i{width:7px; height:7px; border-radius:999px; background:#C7D2DC; display:block;}
+  .mock .bar .menu{margin-left:auto; display:flex; gap:6px;}
+  .mock .bar .menu b{width:18px; height:6px; border-radius:3px; background:#C7D2DC; display:block;}
+  .mock .scr{padding:13px; display:flex; flex-direction:column; gap:8px;}
+  .wf{background:#E7EDF3; border-radius:4px;}
+  .wf.hero{height:24px;}
+  .wf.line{height:8px; width:72%;}
+  .wf.line.sm{width:48%;}
+  .wf.btn{height:15px; width:66px; background:var(--accent); border-radius:5px; margin:2px 0;}
+  .wf.blk{height:15px;}
+  .mock .scr.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:7px;}
+  .wf.cell{height:26px;}
+  .mocktag{font-family:'JetBrains Mono'; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); text-align:center; margin:-8px 0 14px;}
+
+  /* ---- Inspiration Blitz (3 live landing pages) ---- */
+  .blitz{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; flex:1;}
+  .bcard{display:flex; flex-direction:column; text-decoration:none; color:inherit; background:#fff;
+         border:1px solid var(--line); border-radius:14px; overflow:hidden; transition:transform .15s, box-shadow .15s;}
+  .bcard:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(15,26,36,.14);}
+  .bcard.best{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent);}
+  .bthumb{height:196px; overflow:hidden; position:relative; background:#fff; border-bottom:1px solid var(--line);}
+  .bthumb iframe{width:1280px; height:920px; border:0; transform:scale(.2685); transform-origin:top left; pointer-events:none;}
+  .brank{position:absolute; top:10px; left:10px; z-index:2; font-family:'JetBrains Mono'; font-weight:600;
+         font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:5px 11px; border-radius:999px;
+         background:rgba(255,255,255,.92); border:1px solid var(--line); color:var(--muted); box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .brank.good{background:var(--accent); color:#04201b; border-color:var(--accent);}
+  .bmeta{padding:15px 18px; display:flex; flex-direction:column; gap:3px;}
+  .bmeta .bn{font-family:'JetBrains Mono'; font-size:11px; color:var(--accent-deep); letter-spacing:.1em;}
+  .bmeta .bt{font-family:'Bricolage Grotesque'; font-weight:600; font-size:18px; color:var(--ink);}
+  .bmeta .bd{font-size:12.5px; color:var(--muted); line-height:1.35;}
+  .bmeta .bo{margin-top:8px; font-family:'JetBrains Mono'; font-size:11px; font-weight:600; color:var(--accent-deep); letter-spacing:.05em;}
+
+  /* ---- featured product (slide after Inspiration Blitz) ---- */
+  .feature{display:grid; grid-template-columns:1.3fr .7fr; gap:46px; flex:1; align-items:center;}
+  .fbrowser{position:relative; display:block; border-radius:14px; overflow:hidden; height:384px; border:1px solid var(--line-dark); box-shadow:0 28px 64px rgba(0,0,0,.55); background:#04121d;}
+  .fbrowser iframe{width:1280px; height:760px; border:0; transform:scale(.52); transform-origin:top left; pointer-events:none;}
+  .fname{font-family:'Bricolage Grotesque'; font-weight:700; font-size:30px; color:#fff; margin-bottom:14px;}
+  .fname sup{font-size:13px; color:var(--accent); top:-.7em;}
+
+  /* ---- landing page anatomy (slide 7) ---- */
+  .anatomy{display:grid; grid-template-columns:300px 1fr; gap:72px; flex:1; align-items:center; padding-top:4px;}
+  .lpframe{width:300px; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 26px 60px rgba(0,0,0,.42); display:flex; flex-direction:column;}
+  .lpbar{height:26px; background:#EDF1F6; display:flex; align-items:center; gap:5px; padding:0 12px; flex:none;}
+  .lpbar i{width:7px; height:7px; border-radius:50%; background:#C7D2DC;}
+  .lpband{position:relative; padding:13px 16px 13px 40px; border-bottom:1px solid #EEF2F6; display:flex; flex-direction:column; gap:6px; justify-content:center;}
+  .lpband:last-child{border-bottom:0;}
+  .bchip{position:absolute; left:13px; top:50%; transform:translateY(-50%); font-family:'JetBrains Mono'; font-weight:600; font-size:10px; color:var(--accent-deep);}
+  .lw{background:#E4EAF1; border-radius:2px; height:5px; width:100%;}
+  .lw.t{height:8px; width:72%;}
+  .lw.btn{height:11px; width:48px; background:var(--accent); border-radius:3px;}
+  .lrow{display:flex; align-items:center; gap:6px;}
+  .lchk{color:var(--accent-deep); font-size:9px; font-weight:700; line-height:1;}
+  .lbul{color:#C7D2DC; font-size:11px; line-height:1;}
+  .lstep{display:flex; gap:5px; align-items:center;}
+  .lnode{width:14px; height:14px; border-radius:50%; border:1.3px solid var(--accent); color:var(--accent-deep); font-size:7px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono'; font-weight:600;}
+  .lstars{text-align:center; color:var(--accent); font-size:8px; letter-spacing:2px; margin-top:4px;}
+  .annolist{position:relative; display:flex; flex-direction:column; gap:16px; padding-left:4px;}
+  .annolist::before{content:""; position:absolute; left:17px; top:18px; bottom:18px; width:2px; background:linear-gradient(rgba(10,191,163,.55), rgba(10,191,163,.12));}
+  .anno{display:flex; gap:20px; align-items:center; position:relative;}
+  .anode{width:36px; height:36px; border-radius:50%; border:1.5px solid var(--accent); color:var(--accent); background:var(--ink);
+          display:flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque'; font-weight:700; font-size:15px; flex:none; z-index:1;}
+  .aname{font-family:'Bricolage Grotesque'; font-weight:600; font-size:20px; color:#fff;}
+  .aq{font-style:italic; font-size:14px; color:var(--muted-d); margin-top:3px;}
+
+  .chips{display:flex; gap:12px; justify-content:center; margin-top:18px;}
+  .note{font-size:13px; font-style:italic; color:var(--muted); margin-top:16px;}
+  .note b{color:var(--accent-deep); font-style:normal;}
+  .slide.dark .note b{color:var(--accent);}
+
+  /* ---- deliverables / takeaways ---- */
+  .stack{display:flex; flex-direction:column; gap:14px; flex:1;}
+  .deliv{display:flex; align-items:center; gap:24px; padding:24px 28px;}
+  .deliv .mk{width:52px; height:52px; border-radius:999px; border:1.5px solid var(--accent); flex:none;
+             display:flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque'; font-weight:700; font-size:22px; color:var(--accent);}
+  .deliv .dt{font-family:'Bricolage Grotesque'; font-weight:600; font-size:21px;}
+  .slide.dark .deliv .dt{color:#fff;}
+  .deliv .dd{font-size:14px; color:var(--muted); margin-top:5px;}
+  .slide.dark .deliv .dd{color:var(--muted-d);}
+
+  /* ---- HERO formula + contrast (muted vs accent) ---- */
+  .formula{border:1px solid var(--accent); background:var(--accent-tint); border-radius:var(--r);
+           padding:18px; text-align:center; font-family:'Bricolage Grotesque'; font-weight:600; font-size:20px; color:var(--accent-deep); margin-bottom:20px;}
+  .exrow{display:grid; grid-template-columns:1fr 1fr; gap:18px; flex:1;}
+  .ex{border-radius:var(--r); padding:20px 22px; display:flex; flex-direction:column; gap:9px;}
+  .ex.dull{background:var(--surface); border:1px solid var(--line);}
+  .ex.live{background:var(--accent-tint); border:1px solid var(--accent); border-left:4px solid var(--accent);}
+  .ex .lab{font-family:'JetBrains Mono'; font-weight:600; font-size:11px; letter-spacing:.1em;}
+  .ex.dull .lab{color:var(--muted);} .ex.live .lab{color:var(--accent-deep);}
+  .ex .q{font-style:italic; font-size:18px; line-height:1.32;}
+  .ex.dull .q{color:var(--muted);} .ex.live .q{color:var(--text);}
+  .ex .why{font-size:12px; color:var(--muted);}
+
+  /* ---- Problem zigzag (slide 10) ---- */
+  .pzig{display:flex; flex-direction:column; gap:16px; flex:1; justify-content:center;}
+  .pq{width:58%; background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 26px; display:flex; gap:20px; align-items:center; position:relative;}
+  .pq .pn{font-family:'Bricolage Grotesque'; font-weight:800; font-size:42px; color:var(--line); line-height:1; flex:none;}
+  .pq .pl{font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .pq .pt{font-style:italic; font-size:17px; color:var(--ink); line-height:1.38;}
+  .pq.k{width:64%; border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 16px 36px rgba(10,191,163,.14);}
+  .pq.k .pn{color:var(--accent);}
+  .pq.k .pt{font-size:19px;}
+  .pqbadge{position:absolute; top:-12px; right:20px; font-size:11px; padding:5px 13px;}
+  /* ---- Build flow (slide 14) ---- */
+  .track{display:flex; align-items:stretch; gap:30px; flex:1;}
+  .grp{flex:1; display:flex; flex-direction:column;}
+  .grphd{font-family:'JetBrains Mono'; font-weight:600; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); text-align:center; padding-bottom:14px; margin-bottom:28px; border-bottom:1px dashed rgba(255,255,255,.16);}
+  .gnodes{display:flex; align-items:flex-start; justify-content:center; gap:8px; flex:1;}
+  .fnode{flex:1; max-width:130px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;}
+  .fn{width:48px; height:48px; border-radius:50%; border:1.6px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Bricolage Grotesque'; font-weight:700; font-size:18px; flex:none;}
+  .fn.goal{background:var(--accent); color:#04201b;}
+  .fl{font-size:12.5px; color:#CBD5E1; line-height:1.35;}
+  .farrow{color:var(--accent); font-size:18px; margin-top:14px;}
+  .grpsep{align-self:center; color:var(--accent); font-size:26px;}
+
+  /* ---- blocks (solution/how/cta) ---- */
+  .block{border:1px solid var(--line); border-radius:var(--r); padding:16px 20px; margin-bottom:12px; background:var(--surface);}
+  .block .bl{font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-deep); margin-bottom:9px;}
+  .wr{display:flex; gap:26px; font-size:14px; align-items:center;}
+  .wr .bad{color:var(--muted);} .wr .good{color:var(--text); font-weight:500;}
+  .flow{display:flex; align-items:center; gap:11px; font-size:13.5px;}
+  .flow .d{width:26px; height:26px; border-radius:999px; border:1.5px solid var(--accent); color:var(--accent-deep);
+           display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; font-family:'Bricolage Grotesque';}
+  .flow .ar{color:var(--accent);}
+  .ctas{display:flex; gap:12px; align-items:center;}
+  .ctas .primary{background:var(--accent); color:#04201b; font-weight:700; padding:10px 20px; border-radius:9px; font-size:14px;}
+  .ctas .ghost{border:1px solid var(--line); color:var(--muted); padding:10px 18px; border-radius:9px; font-size:14px;}
+
+  /* ---- checklist ---- */
+  .chk{display:flex; align-items:center; gap:18px; padding:15px 24px; margin-bottom:10px;}
+  .chk .ck{width:28px; height:28px; border-radius:999px; border:1.5px solid var(--accent); color:var(--accent-deep);
+           display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex:none;}
+  .chk .t{font-size:15px;}
+
+  /* ---- AI studio ---- */
+  .ai{display:grid; grid-template-columns:1.05fr .95fr; gap:36px; flex:1; align-items:center;}
+  .ai .big{font-family:'Bricolage Grotesque'; font-weight:600; font-size:30px; line-height:1.25; letter-spacing:-0.01em;}
+  .ai .big b{color:var(--accent-deep);}
+  .ai .how{padding:26px;}
+  .ai .hs{display:flex; gap:16px; align-items:flex-start; margin-bottom:18px;}
+  .ai .hs:last-child{margin-bottom:0;}
+  .ai .hs .n{width:30px; height:30px; border-radius:999px; border:1.5px solid var(--accent); color:var(--accent-deep);
+             display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Bricolage Grotesque'; flex:none; font-size:14px;}
+  .ai .hs .tt{font-size:14.5px; line-height:1.4; padding-top:4px;}
+
+  /* ---- recap ---- */
+  .recap{display:grid; grid-template-columns:1.55fr 1fr; gap:24px; flex:1;}
+  .rleft{position:relative;}
+  .giant{position:absolute; top:-58px; right:0; font-family:'Bricolage Grotesque'; font-weight:800; font-size:300px; line-height:1; color:transparent; -webkit-text-stroke:2px rgba(10,191,163,.16); z-index:0; pointer-events:none;}
+  .tklist{position:relative; z-index:1; display:flex; flex-direction:column; gap:18px; margin-bottom:20px;}
+  .tki{display:flex; gap:16px; align-items:flex-start;}
+  .tkn{width:30px; height:30px; border-radius:50%; border:1.5px solid var(--accent); color:var(--accent); font-family:'Bricolage Grotesque'; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; flex:none;}
+  .tki p{font-size:15.5px; color:#E4EAEF; line-height:1.4; padding-top:4px;}
+  .hw{border:1px solid var(--accent); background:var(--accent-tint); border-radius:var(--r); padding:24px; display:flex; flex-direction:column;}
+  .hw h3{font-family:'Bricolage Grotesque'; font-weight:600; font-size:17px; color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:9px;}
+  .hw h3 .k{font-family:'JetBrains Mono'; font-size:12px; color:var(--accent); letter-spacing:.1em;}
+  .hw .s{display:flex; gap:12px; font-size:13.5px; margin-bottom:13px; line-height:1.35; color:#D4DCE3;}
+  .hw .s .n{color:var(--accent); font-weight:700;}
+  .hw .res{margin-top:auto; font-size:11.5px; color:var(--muted-d); font-style:italic; letter-spacing:.02em;}
+  .quote{position:relative; z-index:1; margin-top:14px; font-style:italic; font-size:14px; color:var(--accent); line-height:1.45;}
+
+  /* ---- nav ---- */
+  #nav{position:fixed; bottom:18px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:18px;
+       z-index:50; background:rgba(0,0,0,.5); padding:8px 18px; border-radius:999px; backdrop-filter:blur(8px);}
+  #nav button{background:none; border:none; color:#fff; font-size:20px; cursor:pointer; opacity:.8; line-height:1;}
+  #nav button:hover{opacity:1;}
+  #counter{color:#fff; font-family:'JetBrains Mono'; font-size:13px; min-width:56px; text-align:center;}
+  #prog{position:fixed; top:0; left:0; height:2px; background:var(--accent); z-index:60; transition:width .3s;}
+  #hint{position:fixed; bottom:21px; right:22px; color:#46505f; font-size:11px; font-family:'JetBrains Mono'; z-index:50;}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="stage">
+
+  <!-- 1 COVER -->
+  <section class="slide dark cover active">
+    <div class="brand"><span class="pill mono" style="font-size:10px; letter-spacing:.14em;">TheNextX · Techcombank</span></div>
+    <div class="rule"></div>
+    <div class="kicker" style="margin-bottom:18px;">Workshop 3</div>
+    <h1 class="disp" style="font-size:56px; color:#fff; max-width:780px;">Xây dựng Website<br>cho Sản phẩm</h1>
+    <p class="lead muted it" style="margin-top:20px;">Để mọi người hiểu ý tưởng của bạn — code không còn là rào cản.</p>
+    <div class="speaker">
+      <span class="slabel">Speaker</span>
+      <span class="sname">Quang Khải</span>
+    </div>
+  </section>
+
+  <!-- 1b INSPIRATION BLITZ -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Mở đầu · Inspiration Blitz</div><h2 class="title">Cùng 1 sản phẩm — 3 cách làm landing page</h2></div>
+    <div class="blitz">
+      <a class="bcard" href="demo-1-te.html" target="_blank">
+        <div class="bthumb"><span class="brank">Tệ</span><iframe src="demo-1-te.html" scrolling="no" tabindex="-1" title="Demo tệ"></iframe></div>
+        <div class="bmeta"><span class="bn">01</span><span class="bt">Tệ</span><span class="bd">Chữ dày · không CTA · không rõ sản phẩm là gì</span><span class="bo">Mở trang →</span></div>
+      </a>
+      <a class="bcard" href="demo-2-on.html" target="_blank">
+        <div class="bthumb"><span class="brank">Ổn</span><iframe src="demo-2-on.html" scrolling="no" tabindex="-1" title="Demo ổn"></iframe></div>
+        <div class="bmeta"><span class="bn">02</span><span class="bt">Ổn</span><span class="bd">Template đơn giản · sạch · đủ thông tin</span><span class="bo">Mở trang →</span></div>
+      </a>
+      <a class="bcard best" href="demo-3-xuatsac.html" target="_blank">
+        <div class="bthumb"><span class="brank good">Xuất sắc</span><iframe src="demo-3-xuatsac.html" scrolling="no" tabindex="-1" title="Demo xuất sắc"></iframe></div>
+        <div class="bmeta"><span class="bn">03</span><span class="bt">Xuất sắc</span><span class="bd">Hero rõ · problem mạnh · CTA nổi bật · 5 section</span><span class="bo">Mở trang →</span></div>
+      </a>
+    </div>
+    <p class="note">Cue MC: <b>"Bạn chọn cái nào để đăng ký — và tại sao?"</b> → rút ra nguyên tắc: Rõ ràng &gt; Đẹp</p>
+  </section>
+
+  <!-- 1c FEATURED PRODUCT -->
+  <section class="slide dark">
+    <div class="header"><div class="kicker">Mục tiêu buổi học</div><h2 class="title">Đây là thứ ta sẽ build hôm nay</h2></div>
+    <div class="feature">
+      <a class="fbrowser" href="https://odinhoang03.github.io/studybuddy-hero/" target="_blank" title="Mở StudyBuddy"><iframe src="https://odinhoang03.github.io/studybuddy-hero/" scrolling="no" tabindex="-1" title="StudyBuddy hero"></iframe></a>
+      <div>
+        <div class="fname">StudyBuddy<sup>®</sup></div>
+        <p class="lead muted" style="margin-bottom:22px;">Landing page cho app tìm bạn học chung — chính là mức <span style="color:#fff;">"Xuất sắc"</span> bạn vừa xem ở Inspiration Blitz.</p>
+        <div class="li">Cùng 5 section chuẩn</div>
+        <div class="li">Build bằng Google AI Studio</div>
+        <div class="li">Có link chia sẻ được</div>
+        <a class="pill" href="https://odinhoang03.github.io/studybuddy-hero/" target="_blank" style="margin-top:20px; text-decoration:none;">Xem bản live →</a>
+      </div>
+    </div>
+    <p class="note">Cuối buổi, bạn sẽ có một trang tương tự — cho chính ý tưởng của mình.</p>
+  </section>
+
+  <!-- 2 AGENDA -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Agenda</div><h2 class="title">Hành trình hôm nay</h2></div>
+    <div class="tl">
+      <div class="tli"><span class="tlnode"></span><span class="tltag">Mở đầu</span><span class="tlttl">Inspiration Blitz & Mục tiêu</span><span class="tldesc">3 landing page thật · Giới thiệu Speaker</span></div>
+      <div class="tli"><span class="tlnode"></span><span class="tltag">Phần 1</span><span class="tlttl">Hiểu Landing Page</span><span class="tldesc">Landing page vs Website · 5 Section chuẩn</span></div>
+      <div class="tli"><span class="tlnode"></span><span class="tltag">Phần 2</span><span class="tlttl">Viết Nội dung</span><span class="tldesc">Hero · Problem · Solution · How · CTA — viết live</span></div>
+      <div class="tli"><span class="tlnode"></span><span class="tltag">Phần 3</span><span class="tlttl">Build với Google AI Studio</span><span class="tldesc">Từ nội dung 5 section → landing page có link</span></div>
+      <div class="tli"><span class="tlnode"></span><span class="tltag">Kết thúc</span><span class="tlttl">Checklist · Review · Homework</span><span class="tldesc">Đánh giá landing page · Bước tiếp theo</span></div>
+    </div>
+  </section>
+
+  <!-- 3 MUC TIEU -->
+  <section class="slide dark">
+    <div class="rule"></div>
+    <p class="lead muted it" style="margin-bottom:28px;">Cuối workshop này, mỗi team sẽ có:</p>
+    <div class="stack" style="gap:16px; flex:none;">
+      <div class="card deliv"><div class="mk">1</div><div><div class="dt">Nội dung 5 section đã viết xong</div><div class="dd">Hero · Problem · Solution · How it Works · CTA</div></div></div>
+      <div class="card deliv"><div class="mk">2</div><div><div class="dt">Landing page thật có link chia sẻ được</div><div class="dd">Build bằng Google AI Studio — ai cũng mở được</div></div></div>
+    </div>
+    <p class="note" style="text-align:center; margin-top:auto;">Không cần biết code · Không cần đẹp hoàn hảo · Cần <b>có</b> và <b>chia sẻ được</b></p>
+  </section>
+
+  <!-- 4 DIVIDER P1 -->
+  <section class="slide dark divider">
+    <div class="num">01</div>
+    <div class="kicker">Phần 1</div>
+    <h1 class="disp" style="font-size:58px; color:#fff; margin:18px 0;">Hiểu Landing Page</h1>
+    <p class="lead muted it" style="margin-bottom:24px;">Landing page vs Full website · 5 Section chuẩn</p>
+    <span class="pill" style="align-self:flex-start;">10 phút</span>
+  </section>
+
+  <!-- 5 LP vs WEBSITE -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Phần 1 · So sánh</div><h2 class="title">Landing Page vs Full Website</h2></div>
+    <div class="cols c2">
+      <div class="card colcard"><div class="ch"><span class="n">A</span>Landing Page</div>
+        <div class="mock"><div class="bar"><i></i><i></i><i></i></div>
+          <div class="scr"><div class="wf hero"></div><div class="wf line"></div><div class="wf line sm"></div><span class="wf btn"></span><div class="wf blk"></div></div>
+        </div>
+        <div class="mocktag">1 trang · 1 nút CTA</div>
+        <div class="li">1 trang · 1 mục tiêu duy nhất</div>
+        <div class="li">Đăng ký / tải app / liên hệ</div>
+        <div class="li">Pitch & kiếm early adopters</div>
+        <span class="pill solid" style="align-self:flex-start; margin-top:auto;">Dùng cho Round 2</span>
+      </div>
+      <div class="card colcard"><div class="ch" style="color:var(--muted);"><span class="n" style="color:var(--muted);">B</span>Full Website</div>
+        <div class="mock"><div class="bar"><i></i><i></i><i></i><span class="menu"><b></b><b></b><b></b><b></b></span></div>
+          <div class="scr grid"><div class="wf cell"></div><div class="wf cell"></div><div class="wf cell"></div><div class="wf cell"></div><div class="wf cell"></div><div class="wf cell"></div></div>
+        </div>
+        <div class="mocktag">Nhiều trang · nhiều mục tiêu</div>
+        <div class="li" style="color:var(--muted);">Nhiều trang · nhiều mục tiêu</div>
+        <div class="li" style="color:var(--muted);">Đầy đủ tính năng & thông tin</div>
+        <div class="li" style="color:var(--muted);">Khi đã có product thật</div>
+        <span class="pill ghost" style="align-self:flex-start; margin-top:auto;">Chưa cần bây giờ</span>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="pill">Load nhanh</span>
+      <span class="pill">Đọc 30 giây hiểu ngay</span>
+      <span class="pill">1 CTA duy nhất</span>
+    </div>
+  </section>
+
+  <!-- 6 5 SECTION -->
+  <section class="slide dark">
+    <div class="header"><div class="kicker">Phần 1 · Framework</div><h2 class="title">5 Section của một Landing Page chuẩn</h2></div>
+    <div class="anatomy">
+      <div class="lpframe">
+        <div class="lpbar"><i></i><i></i><i></i></div>
+        <div class="lpband"><span class="bchip">01</span><div class="lw t"></div><div class="lw" style="width:52%"></div><div class="lw btn"></div></div>
+        <div class="lpband"><span class="bchip">02</span><div class="lrow"><span class="lbul">•</span><div class="lw" style="width:74%"></div></div><div class="lrow"><span class="lbul">•</span><div class="lw" style="width:56%"></div></div></div>
+        <div class="lpband"><span class="bchip">03</span><div class="lrow"><span class="lchk">✓</span><div class="lw" style="width:66%"></div></div><div class="lrow"><span class="lchk">✓</span><div class="lw" style="width:54%"></div></div></div>
+        <div class="lpband"><span class="bchip">04</span><div class="lstep"><span class="lnode">1</span><span class="lw" style="width:13px;height:2px"></span><span class="lnode">2</span><span class="lw" style="width:13px;height:2px"></span><span class="lnode">3</span></div></div>
+        <div class="lpband"><span class="bchip">05</span><div class="lw btn" style="width:96px;height:13px;margin:0 auto"></div><div class="lstars">★★★★★</div></div>
+      </div>
+      <div class="annolist">
+        <div class="anno"><div class="anode">01</div><div><div class="aname">Hero</div><div class="aq">"Đây là gì? Dành cho ai?"</div></div></div>
+        <div class="anno"><div class="anode">02</div><div><div class="aname">Problem</div><div class="aq">"Bạn có đang gặp vấn đề này?"</div></div></div>
+        <div class="anno"><div class="anode">03</div><div><div class="aname">Solution</div><div class="aq">"Đây là cách thoát"</div></div></div>
+        <div class="anno"><div class="anode">04</div><div><div class="aname">How it Works</div><div class="aq">"Dùng như thế nào?"</div></div></div>
+        <div class="anno"><div class="anode">05</div><div><div class="aname">CTA + Proof</div><div class="aq">"Tôi làm gì tiếp?"</div></div></div>
+      </div>
+    </div>
+    <p class="note">Hay viết kém nhất: <b>Hero</b> · Hay bị bỏ qua: <b>Problem</b></p>
+  </section>
+
+  <!-- 7 DIVIDER P2 -->
+  <section class="slide dark divider">
+    <div class="num">02</div>
+    <div class="kicker">Phần 2</div>
+    <h1 class="disp" style="font-size:58px; color:#fff; margin:18px 0;">Viết Nội dung</h1>
+    <p class="lead muted it" style="margin-bottom:24px;">Hero · Problem · Solution · How it Works · CTA — viết live</p>
+    <span class="pill" style="align-self:flex-start;">20 phút</span>
+  </section>
+
+  <!-- 8 HERO FORMULA -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Phần 2 · Section 01</div><h2 class="title">Hero Tagline — Công thức</h2></div>
+    <div class="formula">[Giải pháp] cho [Ai] để [Kết quả cụ thể]</div>
+    <div class="exrow">
+      <div class="ex dull">
+        <span class="lab">Draft 1 — Tệ</span>
+        <span class="q">"Nền tảng quản lý tài chính thế hệ mới cho giới trẻ"</span>
+        <span class="why">Quá generic · không nói OUTPUT của user · app nào cũng dùng được</span>
+      </div>
+      <div class="ex live">
+        <span class="lab">Draft 2 — Tốt</span>
+        <span class="q">"Biết tiền đi đâu mỗi tuần — trong 30 giây"</span>
+        <span class="why">Cụ thể · nói về OUTPUT của user · có số liệu</span>
+      </div>
+    </div>
+    <p class="note">Tránh: "nền tảng", "hệ sinh thái", "giải pháp toàn diện", "đổi mới sáng tạo"</p>
+  </section>
+
+  <!-- 9 PROBLEM -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Phần 2 · Section 02</div><h2 class="title">Problem — 3 câu cảm xúc</h2></div>
+    <div class="pzig">
+      <div class="pq" style="align-self:flex-start"><span class="pn">1</span><div><div class="pl">Tình huống thực tế</div><div class="pt">"Bạn nhận tiền đầu tuần — đến thứ 5 đã không biết còn bao nhiêu."</div></div></div>
+      <div class="pq k" style="align-self:center"><span class="pn">2</span><div><div class="pl">Cảm giác</div><div class="pt">"Cảm giác mất kiểm soát mỗi khi nhìn vào ví."</div></div><span class="pill solid pqbadge">Resonate nhất</span></div>
+      <div class="pq" style="align-self:flex-end"><span class="pn">3</span><div><div class="pl">Hệ quả</div><div class="pt">"Và cuối tháng lại phải nhờ bố mẹ thêm tiền."</div></div></div>
+    </div>
+    <p class="note">Câu trigger mạnh nhất thường là <b>câu 2</b> — vì nó chạm vào cảm xúc</p>
+  </section>
+
+  <!-- 10 SOLUTION/HOW/CTA -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Phần 2 · Section 03–05</div><h2 class="title">Solution · How it Works · CTA</h2></div>
+    <div style="flex:1;">
+      <div class="block">
+        <div class="bl">03 · Solution — viết OUTCOME, không viết feature</div>
+        <div class="wr"><span class="bad">✕&nbsp; "Có dashboard với biểu đồ tròn"</span><span class="good">✓&nbsp; "Nhìn 1 cái biết mình đã tiêu bao nhiêu trong tuần"</span></div>
+      </div>
+      <div class="block">
+        <div class="bl">04 · How it Works — 3 bước đơn giản</div>
+        <div class="flow"><span class="d">1</span> Tải app & tạo tài khoản <span class="ar">→</span> <span class="d">2</span> Nhập khoản chi đầu tiên <span class="ar">→</span> <span class="d">3</span> Xem báo cáo tuần</div>
+      </div>
+      <div class="block">
+        <div class="bl">05 · CTA — 1 nút duy nhất, nổi bật</div>
+        <div class="ctas"><span class="primary">Đăng ký miễn phí</span><span class="ghost">Tham gia sớm</span><span class="ghost">Nhận thông báo</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 DIVIDER P3 -->
+  <section class="slide dark divider">
+    <div class="num">03</div>
+    <div class="kicker">Phần 3 + Kết</div>
+    <h1 class="disp" style="font-size:52px; color:#fff; margin:18px 0;">Build với<br>Google AI Studio</h1>
+    <p class="lead muted it" style="margin-bottom:24px;">Từ nội dung 5 section → landing page có link</p>
+    <span class="pill" style="align-self:flex-start;">35 phút</span>
+  </section>
+
+  <!-- 12 GOOGLE AI STUDIO -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Phần 3 · Công cụ</div><h2 class="title">Build với Google AI Studio</h2></div>
+    <div class="ai">
+      <div>
+        <div class="big">Mô tả landing page bằng lời → <b>Gemini dựng ra web thật.</b></div>
+        <div class="chips" style="justify-content:flex-start; margin-top:22px;">
+          <span class="pill">Không kéo thả</span>
+          <span class="pill">Không code</span>
+          <span class="pill">Free</span>
+        </div>
+        <p class="note" style="margin-top:20px;">Input chính = <b>nội dung 5 section</b> vừa viết ở Phần 2</p>
+      </div>
+      <div class="card how">
+        <div class="hs"><div class="n">1</div><div class="tt">Dán nội dung 5 section vào prompt</div></div>
+        <div class="hs"><div class="n">2</div><div class="tt">Gemini generate bản landing page đầu tiên</div></div>
+        <div class="hs"><div class="n">3</div><div class="tt">Refine bằng cách chat tiếp → preview → share link</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 BUILD ROADMAP -->
+  <section class="slide dark">
+    <div class="header"><div class="kicker">Phần 3 · Live build</div><h2 class="title">Từ prompt đến link</h2><p class="lead muted it" style="margin-top:8px;">Speaker screen share · Học sinh follow along</p></div>
+    <div class="track">
+      <div class="grp">
+        <div class="grphd">Sprint 1 · 15′</div>
+        <div class="gnodes">
+          <div class="fnode"><span class="fn">1</span><span class="fl">Viết prompt từ 5 section</span></div>
+          <span class="farrow">→</span>
+          <div class="fnode"><span class="fn">2</span><span class="fl">Gemini generate bản đầu</span></div>
+          <span class="farrow">→</span>
+          <div class="fnode"><span class="fn">3</span><span class="fl">Preview · chỉnh Hero + ảnh</span></div>
+        </div>
+      </div>
+      <span class="grpsep">→</span>
+      <div class="grp">
+        <div class="grphd">Sprint 2 · 15′</div>
+        <div class="gnodes">
+          <div class="fnode"><span class="fn">4</span><span class="fl">Refine màu · section · CTA</span></div>
+          <span class="farrow">→</span>
+          <div class="fnode"><span class="fn">5</span><span class="fl">Check mobile view</span></div>
+          <span class="farrow">→</span>
+          <div class="fnode"><span class="fn goal">✓</span><span class="fl">Publish → Link chia sẻ</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Build thật, không script — nếu lỗi thì fix live</p>
+  </section>
+
+  <!-- 14 CHECKLIST -->
+  <section class="slide light">
+    <div class="header"><div class="kicker">Kết thúc · Đánh giá</div><h2 class="title">Checklist: Landing Page đủ chuẩn</h2></div>
+    <div style="flex:1;">
+      <div class="card chk"><div class="ck">✓</div><div class="t">Đọc Hero tagline trong 5 giây — hiểu ngay sản phẩm là gì chưa?</div></div>
+      <div class="card chk"><div class="ck">✓</div><div class="t">Problem — user có gật đầu "đúng tôi gặp vấn đề này" không?</div></div>
+      <div class="card chk"><div class="ck">✓</div><div class="t">Solution — có ít nhất 2 benefit cụ thể (không phải feature)?</div></div>
+      <div class="card chk"><div class="ck">✓</div><div class="t">CTA — 1 nút duy nhất, màu nổi bật, text rõ ràng?</div></div>
+      <div class="card chk"><div class="ck">✓</div><div class="t">Mobile view — đọc được trên điện thoại không?</div></div>
+    </div>
+    <p class="note">Bắt buộc nhờ 5 người ngoài team review — tác giả không thấy blind spot của mình</p>
+  </section>
+
+  <!-- 15 RECAP + HOMEWORK -->
+  <section class="slide dark">
+    <div class="header"><div class="kicker">Kết thúc</div><h2 class="title">3 Điểm mang về</h2></div>
+    <div class="recap">
+      <div class="rleft">
+        <span class="giant">3</span>
+        <div class="tklist">
+          <div class="tki"><span class="tkn">1</span><p>Landing page = 1 trang · 1 CTA · 5 section chuẩn</p></div>
+          <div class="tki"><span class="tkn">2</span><p>Nội dung trước design — viết xong 5 section rồi mới build</p></div>
+          <div class="tki"><span class="tkn">3</span><p>Publish xong, chia sẻ cho 5 người lạ review — bước hay bị bỏ qua nhất</p></div>
+        </div>
+        <div class="quote">"Landing page xấu mà có nội dung tốt — tốt hơn landing page đẹp không ai hiểu bạn đang làm gì."</div>
+      </div>
+      <div class="hw">
+        <h3>Homework <span class="k">· 48h</span></h3>
+        <div class="s"><span class="n">1</span><span>Hoàn thiện nội dung 5 section</span></div>
+        <div class="s"><span class="n">2</span><span>Publish landing page — có link thật</span></div>
+        <div class="s"><span class="n">3</span><span>Chia sẻ cho 5+ người ngoài team, hỏi: "bạn hiểu mình offer gì không?"</span></div>
+        <div class="res">Worksheet · Checklist · Link ảnh · Google AI Studio</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="nav">
+  <button id="prev">‹</button>
+  <span id="counter">1 / 15</span>
+  <button id="next">›</button>
+</div>
+<div id="hint">← → chuyển slide · F fullscreen</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')], stage=document.getElementById('stage'),
+        counter=document.getElementById('counter'), prog=document.getElementById('prog');
+  let i=0;
+  function show(n){i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    counter.textContent=(i+1)+' / '+slides.length;
+    prog.style.width=((i+1)/slides.length*100)+'%';}
+  function fit(){const s=Math.min(window.innerWidth/1280,window.innerHeight/720);stage.style.transform='scale('+s+')';}
+  document.getElementById('next').onclick=()=>show(i+1);
+  document.getElementById('prev').onclick=()=>show(i-1);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')show(i+1);
+    else if(e.key==='ArrowLeft'||e.key==='PageUp')show(i-1);
+    else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);
+    else if(e.key.toLowerCase()==='f'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+  });
+  window.addEventListener('resize',fit); fit(); show(0);
+</script>
+</body>
+</html>
