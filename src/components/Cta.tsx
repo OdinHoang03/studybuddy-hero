@@ -8,7 +8,10 @@ const stats = [
 
 export default function Cta() {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden py-32 text-center">
+    <section
+      id="cta"
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden py-32 text-center"
+    >
       <span className="bgword" data-parallax>
         join
       </span>

@@ -15,7 +15,10 @@ const benefits = [
 
 export default function Solution() {
   return (
-    <section className="relative flex min-h-screen items-center overflow-hidden py-32">
+    <section
+      id="solution"
+      className="relative flex min-h-screen items-center overflow-hidden py-32"
+    >
       <span className="bgword" data-parallax>
         together
       </span>

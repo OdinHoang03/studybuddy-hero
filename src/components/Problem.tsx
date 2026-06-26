@@ -6,7 +6,10 @@ const items = [
 
 export default function Problem() {
   return (
-    <section className="relative flex min-h-screen items-center overflow-hidden py-32">
+    <section
+      id="problem"
+      className="relative flex min-h-screen items-center overflow-hidden py-32"
+    >
       <span className="bgword" data-parallax>
         alone
       </span>
