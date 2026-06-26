@@ -1,121 +1,163 @@
-# Prompt Template — Cinematic Landing Page (5 Section)
+# Prompt — Cinematic 5-Section Landing (bản gộp)
 
-Đây là "công thức" prompt đã sinh ra website StudyBuddy này. Dùng cho **TheNextX Workshop 3** — sau khi viết xong nội dung 5 section, dán prompt vào **Google AI Studio / v0 / Claude** để AI dựng landing page.
-
----
-
-## Cách dùng (3 bước)
-
-1. Lấy nội dung **5 section** bạn đã viết ở Phần 2 (Hero · Problem · Solution · How it Works · CTA).
-2. Thay mọi `[PLACEHOLDER]` trong template bên dưới bằng nội dung của bạn.
-3. Dán **toàn bộ** vào Google AI Studio (chế độ Build) → xem preview → tinh chỉnh bằng cách chat tiếp.
-
-> Mẹo: giữ phần "Tech & Style" nguyên văn (đó là thứ tạo ra cảm giác cinematic), chỉ thay phần nội dung.
+Bản gộp đầy đủ của prompt gốc (vốn được chỉnh qua nhiều turn) thành **một prompt liền mạch**.
+Phần kỹ thuật giữ **nguyên văn**; chỉ `[BRAND]` và nội dung là chỗ cần điền. Dùng cho **TheNextX Workshop 3** — dán vào Google AI Studio / v0 / Claude.
 
 ---
 
-## TEMPLATE (copy & điền)
+## PROMPT (copy toàn bộ phần dưới, điền `[PLACEHOLDER]`)
 
 ```
-Build a cinematic, single-page landing website for [TÊN SẢN PHẨM] — a [LOẠI SẢN PHẨM] for [ĐỐI TƯỢNG NGƯỜI DÙNG].
+Create a single-page, scroll-driven landing site with a fullscreen looping background
+video, glassmorphic navigation, cinematic editorial typography, and a buttery-smooth
+immersive scroll experience.
 
-== TECH & STYLE (giữ nguyên) ==
-- Stack: React + Vite + TypeScript + Tailwind CSS + shadcn/ui.
-- Smooth scrolling with Lenis.
-- Scroll-triggered fade-up reveals + subtle parallax using GSAP ScrollTrigger.
-- Typography: oversized editorial headings in "Instrument Serif", body in "Inter".
-  In each heading, wrap 1–2 key words in a muted gray for contrast.
-- Theme: dark deep-navy background, white text, one single accent, lots of whitespace.
-- Atmosphere: a fixed layer with soft drifting fog glow + a few floating dust particles.
-- Buttons: glassmorphic (blurred, thin gradient border), rounded-full, hover scale 1.03.
-- Respect prefers-reduced-motion.
+Stack: React + Vite + Tailwind CSS + TypeScript with shadcn/ui.
+GSAP + ScrollTrigger for cinematic scroll reveals & parallax. Lenis for smooth scrolling.
 
-== 5 SECTIONS ==
+=== VIDEO BACKGROUND (Hero) ===
+- Fullscreen <video> element with autoPlay, loop, muted, playsInline
+- Source URL: [VIDEO_URL]
+- Positioned absolute inset-0 w-full h-full object-cover z-0
 
-1) HERO
-- Fullscreen looping background video (autoplay, muted, loop, playsInline, object-cover).
-  [DÁN URL VIDEO, hoặc ghi "use a calm abstract video placeholder"]
-- Headline (serif, very large): "[CÂU HERO — công thức: Giải pháp cho Ai để Kết quả]"
-- Subtext (1–2 câu): "[MÔ TẢ NGẮN]"
-- One primary CTA button: "[NHÃN CTA]"
-- A small "scroll down" hint at the bottom.
+=== FONTS ===
+- Import from Google Fonts: Instrument Serif (display) and Inter weights 400/500 (body)
+- CSS variables: --font-display: 'Instrument Serif', serif  and  --font-body: 'Inter', sans-serif
+- Body uses var(--font-body); headings use inline fontFamily: "'Instrument Serif', serif"
 
-2) PROBLEM — heading: "[CÂU TIÊU ĐỀ NỖI ĐAU]"
-- Three emotional pain points (đúng 3 câu, chạm cảm xúc):
-  1. [NỖI ĐAU 1]
-  2. [NỖI ĐAU 2]
-  3. [NỖI ĐAU 3]
+=== COLOR THEME (dark, HSL values for CSS variables) ===
+--background: 201 100% 13%        (deep navy blue)
+--foreground: 0 0% 100%           (white)
+--muted-foreground: 240 4% 66%    (muted gray)
+--primary: 0 0% 100%  --primary-foreground: 0 0% 4%
+--secondary: 0 0% 10%  --muted: 0 0% 10%  --accent: 0 0% 10%
+--border: 0 0% 18%  --input: 0 0% 18%
 
-3) SOLUTION — heading: "[CÂU TIÊU ĐỀ GIẢI PHÁP]"
-- Three benefits written as OUTCOMES (không phải tính năng):
-  1. [LỢI ÍCH 1] — [mô tả ngắn]
-  2. [LỢI ÍCH 2] — [mô tả ngắn]
-  3. [LỢI ÍCH 3] — [mô tả ngắn]
+=== NAVIGATION BAR ===
+- fixed top, z-50, flex row, justify-between, px-8 py-6, max-w-7xl mx-auto
+- Logo: "[BRAND]®" (® as <sup className="text-xs">), text-3xl tracking-tight, Instrument Serif, text-foreground
+- Nav links (hidden on mobile, md:flex): [LINK_1] (active, text-foreground), [LINK_2], [LINK_3], [LINK_4]
+  — all text-sm text-muted-foreground with hover:text-foreground transition-colors
+  — each link smooth-scrolls (Lenis) to its matching section id
+- CTA button: "[NAV_CTA]", liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground, hover:scale-[1.03]
 
-4) HOW IT WORKS — heading: "[CÂU TIÊU ĐỀ, vd: Bắt đầu trong 60 giây]"
-- Three simple steps, each with a big serif number:
-  1. [BƯỚC 1]
-  2. [BƯỚC 2]
-  3. [BƯỚC 3]
+=== HERO SECTION ===
+- min-h-screen, flex column, centered, text-center, px-6, generous vertical padding
+- H1: "[HERO_HEADLINE]" — text-5xl sm:text-7xl md:text-8xl, leading-[0.95], tracking-[-2.46px],
+  max-w-7xl, font-normal, Instrument Serif. Wrap [KEY_WORDS] in
+  <em className="not-italic text-muted-foreground"> for color contrast.
+- Subtext: text-muted-foreground text-base sm:text-lg max-w-2xl mt-8 leading-relaxed — "[SUBTEXT]"
+- CTA button: "[HERO_CTA]", liquid-glass rounded-full px-14 py-5 text-base text-foreground mt-12,
+  hover:scale-[1.03] cursor-pointer
+- A subtle "scroll down" hint at the bottom
+- At the bottom of the hero, fade the video into the page background color with a gradient
+  (so there is NO hard seam between the video and the sections below).
 
+=== LIQUID GLASS EFFECT (CSS class .liquid-glass) ===
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+    rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+    rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+=== ANIMATIONS (CSS keyframes + classes) ===
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-rise         { animation: fade-rise 0.8s ease-out both; }
+.animate-fade-rise-delay   { animation: fade-rise 0.8s ease-out 0.2s both; }
+.animate-fade-rise-delay-2 { animation: fade-rise 0.8s ease-out 0.4s both; }
+- H1 gets animate-fade-rise ; Subtext gets animate-fade-rise-delay ; Hero CTA gets animate-fade-rise-delay-2
+
+=== CINEMATIC SCROLL EXPERIENCE ===
+- Use Lenis for buttery smooth scrolling so the experience feels like drifting through a digital museum.
+- Use GSAP + ScrollTrigger for cinematic transitions: each section's content fades/rises in on enter.
+- Oversized editorial typography + elegant serif fonts for a luxury campaign aesthetic; in each heading,
+  wrap 1–2 key words in muted gray for contrast.
+- Use parallax depth + floating foreground/background assets so every scroll section feels immersive:
+  give each section a giant faint serif word in the background that drifts on scroll.
+- Layer subtle particles + atmospheric fog (a fixed background layer) to make it feel dreamy and alive.
+- Fine-tune easing + transition timing to give every movement that premium cinematic feel.
+- Respect prefers-reduced-motion (disable animations).
+
+=== SECTIONS — the standard 5-section landing (besides the Hero) ===
+2) PROBLEM — heading "[PROBLEM_HEADLINE]"
+   Three emotional pain points: [PAIN_1] / [PAIN_2] / [PAIN_3]
+3) SOLUTION — heading "[SOLUTION_HEADLINE]"
+   Three benefits written as OUTCOMES (not features): [BENEFIT_1] / [BENEFIT_2] / [BENEFIT_3]
+4) HOW IT WORKS — heading "[HOW_HEADLINE]"
+   Three simple steps, each with a big serif number: [STEP_1] / [STEP_2] / [STEP_3]
 5) CTA + PROOF
-- Three stats: [SỐ LIỆU 1], [SỐ LIỆU 2], [SỐ LIỆU 3]
-- One testimonial quote (serif, italic): "[TRÍCH DẪN]" — [TÊN NGƯỜI, bối cảnh]
-- Final heading + the same CTA button: "[NHÃN CTA]"
+   Three stats: [STAT_1] / [STAT_2] / [STAT_3]
+   One testimonial (serif, italic): "[QUOTE]" — [AUTHOR]
+   Final heading + the same CTA button: "[HERO_CTA]"
 
-== RULES ==
-Minimalist & cinematic. One accent color only. No clutter, no rainbow of colors.
-Every section is full-height and vertically centered. Mobile responsive.
+=== LAYOUT RULES ===
+No decorative blobs, radial gradients, or heavy overlays. Minimalist, cinematic, vertically-centered
+sections. One accent color only. The video + typography + atmosphere provide all visual depth.
 ```
 
 ---
 
-## VÍ DỤ ĐÃ ĐIỀN — StudyBuddy
+## Ghi chú: phần renaissance / 3D (đã điều chỉnh)
+
+Prompt gốc còn có hướng **"renaissance digital museum"** với Three.js + WebGL + GLTF (sneakers / skateboard / shopping bag trôi trong tranh Phục Hưng, bloom lighting…). Bản build này **giữ tinh thần** — cinematic, parallax chiều sâu, atmosphere fog/particles, typography serif khổ lớn, smooth scroll Lenis — nhưng **không dùng Three.js/GLTF**, vì:
+- Cần **model 3D thật** (Blender/Spline) mà ta không có sẵn.
+- Theme "tranh Phục Hưng + streetwear" là vibe thời trang, **lệch** với sản phẩm thực tế.
+
+Muốn bản 3D đúng nghĩa → cần dựng cảnh WebGL riêng + chuẩn bị file GLTF.
+
+---
+
+## Ví dụ đã điền — StudyBuddy (chính là site này)
 
 ```
-Build a cinematic, single-page landing website for StudyBuddy — an app that
-matches high-school students into small study groups, for students preparing
-for exams.
+[BRAND]        = StudyBuddy
+[VIDEO_URL]    = https://d8j0ntlcm91z4.cloudfront.net/.../hf_20260314_131748_...mp4
+[LINK_1..4]    = Trang chủ (active) · Tính năng · Cách hoạt động · Đánh giá
+[NAV_CTA]      = Bắt đầu
+[HERO_HEADLINE]= "Nơi không ai học một mình."   (KEY_WORDS = "không ai", "một mình.")
+[SUBTEXT]      = "StudyBuddy tạo ra không gian để học sinh tìm thấy nhau — học cùng, hỏi cùng,
+                  và không ai bỏ cuộc giữa chừng."
+[HERO_CTA]     = Tìm bạn học ngay
 
-[ ... phần TECH & STYLE giữ nguyên như trên ... ]
-
-1) HERO
-- Background video: a calm dreamy night-study scene (abstract).
-- Headline: "Nơi không ai học một mình."  (mute "không ai" và "một mình")
-- Subtext: "StudyBuddy tạo ra không gian để học sinh tìm thấy nhau — học cùng,
-  hỏi cùng, và không ai bỏ cuộc giữa chừng."
-- CTA: "Tìm bạn học ngay"
-
-2) PROBLEM — "Ôn thi một mình rất dễ nản."
+PROBLEM  — "Ôn thi một mình rất dễ nản."
   1. Kẹt một bài Toán cả buổi tối, không biết hỏi ai.
   2. Mở sách ra là buồn ngủ — học 20 phút lại cầm điện thoại.
   3. Lên kế hoạch ôn thi rất hăng, ba ngày sau là bỏ.
 
-3) SOLUTION — "Có bạn học cùng, mọi thứ khác hẳn."
-  1. Luôn có người hỏi bài — kẹt chỗ nào, nhắn nhóm có người giải đáp ngay.
-  2. Học đều vì có người chờ — lịch học chung khiến bạn khó bỏ buổi.
-  3. Đúng người, đúng môn — ghép với bạn cùng khối, cùng mục tiêu.
+SOLUTION — "Có bạn học cùng, mọi thứ khác hẳn."
+  1. Luôn có người hỏi bài
+  2. Học đều vì có người chờ
+  3. Đúng người, đúng môn
 
-4) HOW IT WORKS — "Bắt đầu trong 60 giây."
-  1. Chọn môn & mục tiêu
-  2. Được ghép nhóm 3–5 bạn cùng môn
-  3. Học chung theo lịch
+HOW IT WORKS — "Bắt đầu trong 60 giây."
+  1. Chọn môn & mục tiêu   2. Được ghép nhóm   3. Học chung theo lịch
 
-5) CTA + PROOF
-- Stats: 2.400+ học sinh đang học cùng nhau · 87% học đều hơn sau 2 tuần · 4.8★
-- Testimonial: "Trước mình toàn học nửa chừng rồi bỏ. Có nhóm rồi tự nhiên tối
-  nào cũng mở máy vì sợ các bạn chờ." — Lan Phương, lớp 12, Hà Nội
-- Final heading: "Tìm bạn học của bạn — ngay hôm nay."  ·  CTA: "Tìm bạn học ngay"
+CTA + PROOF
+  Stats: 2.400+ học sinh · 87% học đều hơn sau 2 tuần · 4.8★
+  Quote: "Trước mình toàn học nửa chừng rồi bỏ. Có nhóm rồi tự nhiên tối nào cũng mở máy
+          vì sợ các bạn chờ." — Lan Phương, lớp 12, Hà Nội
+  Final CTA: Tìm bạn học ngay
 ```
-
----
-
-## Checklist sau khi AI build xong
-
-- [ ] Đọc Hero 5 giây có hiểu sản phẩm là gì không?
-- [ ] Problem có khiến người đọc gật đầu "đúng tôi"?
-- [ ] Solution nói OUTCOME (không phải feature)?
-- [ ] Chỉ 1 CTA chính, nổi bật?
-- [ ] Đọc tốt trên điện thoại?
-
-Mỗi điểm chưa đạt → chat tiếp với AI để sửa (vd: *"làm Hero headline ngắn và mạnh hơn"*).
